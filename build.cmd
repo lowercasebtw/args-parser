@@ -1,0 +1,1 @@
+g++ -Wall -I . -o build/main main.cpp ptsd.cpp

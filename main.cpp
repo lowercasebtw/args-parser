@@ -8,27 +8,15 @@ class Argument {
 public:
     Argument()         
         : m_name(nullptr),
-          m_value(nullptr),
-          m_has_value(false),
-          m_is_default(false) {}
-
-    Argument(char* value, bool is_default) 
-        : m_name(nullptr),
-          m_value(value),
-          m_has_value(true),
-          m_is_default(is_default) {}
+          m_value(nullptr) {}
 
     Argument(char* name, char* value) 
         : m_name(name),
-          m_value(value),
-          m_has_value(true),
-          m_is_default(false) {}
+          m_value(value) {}
 
     Argument(char* name) 
         : m_name(name),
-          m_value(nullptr),
-          m_has_value(false),
-          m_is_default(false) {}
+          m_value(nullptr) {}
 
     char* getName() {
         return m_name;
@@ -48,28 +36,25 @@ public:
     }
 
     bool hasValue() {
-        return m_has_value;
+        return m_value != nullptr;
     }
 
     bool isDefault() {
-        return m_is_default;
+        return m_name == nullptr && hasValue();
     }
 
 private:
     char* m_name;
     char* m_value;
-    bool m_has_value;
-    bool m_is_default;
 };
 
 class ArgumentParser {
 public:
     ArgumentParser(int argc, char** argv) :
+        m_arguments(std::map<int, Argument>()),
+        m_arguments_length(0),
         m_argc(argc),
-        m_args(argv) {
-            m_arguments = std::map<int, Argument>();
-            m_arguments_length = 0;
-        }
+        m_argv(argv) {}
 
     bool parse() {
         if (m_argc == 0)
@@ -77,10 +62,10 @@ public:
 
         int index = 1;
         while (m_argc-- > 1) {
-            char* arg = m_args[index++];
+            char* arg = m_argv[index++];
             int arg_len = strlen(arg);
             if (arg[0] != '-') {
-                m_arguments[m_arguments_length++] = Argument(arg, true);
+                m_arguments[m_arguments_length++] = Argument(nullptr, arg);
                 continue;
             }
             if (arg[0] == '-' && arg_len == 1)
@@ -132,7 +117,7 @@ private:
     int m_arguments_length;
 
     int m_argc;
-    char** m_args;
+    char** m_argv;
 };
 
 int main(int argc, char** argv) {
@@ -148,11 +133,15 @@ int main(int argc, char** argv) {
             fprintf(stderr, "ERROR: failed to get argument by index\n");
             return -1;
         }
+        printf("<----------------------------->\n");
         printf("Name: %s\n", arg.getName());
         printf("Has Value: %s\n", arg.hasValue() ? "true" : "false");
         if (arg.hasValue()) 
             printf("  Value: %s\n", arg.getString());
         printf("Is Default: %s\n", arg.isDefault() ? "true" : "false");
+        if (i == arguments.size() - 1) {
+            printf("<----------------------------->\n");
+        }
     }
 
     //     char* m_name;
