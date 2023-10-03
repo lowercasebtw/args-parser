@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <map>
+#include <vector>
 
 #include "ptsd.h"
 
@@ -51,8 +51,7 @@ private:
 class ArgumentParser {
 public:
     ArgumentParser(int argc, char** argv) :
-        m_arguments(std::map<int, Argument>()),
-        m_arguments_length(0),
+        m_arguments(std::vector<Argument>()),
         m_argc(argc),
         m_argv(argv) {}
 
@@ -65,7 +64,7 @@ public:
             char* arg = m_argv[index++];
             int arg_len = strlen(arg);
             if (arg[0] != '-') {
-                m_arguments[m_arguments_length++] = Argument(nullptr, arg);
+                m_arguments.push_back(Argument(nullptr, arg));
                 continue;
             }
             if (arg[0] == '-' && arg_len == 1)
@@ -78,10 +77,10 @@ public:
             if (eqIndex >= 0) {
                 char* value = ptsd::strslice(name, eqIndex + 1, name_len);
                 name = ptsd::strslice(name, 0, eqIndex);
-                m_arguments[m_arguments_length++] = Argument(name, value);
+                m_arguments.push_back(Argument(name, value));
                 continue;
             }
-            m_arguments[m_arguments_length++] = Argument(name);
+            m_arguments.push_back(Argument(name));
         }
 
         return true;
@@ -90,7 +89,7 @@ public:
     bool get(char* name, Argument* argument) {
         if (m_arguments.empty())
             return false;
-        for (int i = 0; i < m_arguments_length; ++i) {
+        for (int i = 0; i < size(); ++i) {
             Argument arg = m_arguments[i];
             char* arg_name = arg.getName();
             if (arg_name != nullptr && strcmp(arg_name, name) == 0) {
@@ -102,19 +101,18 @@ public:
     }
 
     bool get(int index, Argument* argument) {
-        if (index < 0 || index > m_arguments_length)
+        if (index < 0 || index > size())
             return false;
-        *argument = m_arguments[index];
+        *argument = m_arguments.at(index);
         return true;
     }
 
     int size() {
-        return m_arguments_length;
+        return m_arguments.size();
     }
 
 private:
-    std::map<int, Argument> m_arguments;
-    int m_arguments_length;
+    std::vector<Argument> m_arguments;
 
     int m_argc;
     char** m_argv;
