@@ -14,10 +14,6 @@ public:
         : m_name(name),
           m_value(value) {}
 
-    Argument(char* name) 
-        : m_name(name),
-          m_value(nullptr) {}
-
     char* getName() {
         return m_name;
     }
@@ -80,7 +76,7 @@ public:
                 m_arguments.push_back(Argument(name, value));
                 continue;
             }
-            m_arguments.push_back(Argument(name));
+            m_arguments.push_back(Argument(name, nullptr));
         }
 
         return true;
